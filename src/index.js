@@ -12,8 +12,7 @@ var Problem = /** @class */ (function () {
     }
     Problem.prototype.calculateDueDate = function (submitDateString, turnaroundTime) {
         var submitDate = moment(submitDateString, this.ISO_8601_FORMAT);
-        var dayOfWeek = submitDate.day();
-        if (dayOfWeek == 0 || dayOfWeek == 6) {
+        if (!this._isWorkingDay(submitDate)) {
             throw new Error('The submitted date is not a working day.');
         }
         var startOfWorkingDay = moment(submitDate).startOf('day').add(this.workingHoursStart, 'hours');
@@ -24,13 +23,16 @@ var Problem = /** @class */ (function () {
         var numberOfDays = Math.floor((turnaroundTime + startOfWorkingDayDiff) / this.workingHoursDiff);
         while (numberOfDays > 0) {
             startOfWorkingDay.add(24, 'hours');
-            var dayOfWeek_1 = startOfWorkingDay.day();
-            if (dayOfWeek_1 > 0 && dayOfWeek_1 < 6) {
+            if (this._isWorkingDay(startOfWorkingDay)) {
                 numberOfDays--;
             }
         }
         var dueDate = moment(startOfWorkingDay).add((turnaroundTime + startOfWorkingDayDiff) % this.workingHoursDiff, 'hours');
         return dueDate.format(this.ISO_8601_FORMAT);
+    };
+    Problem.prototype._isWorkingDay = function (date) {
+        var dayOfWeek = date.day();
+        return (dayOfWeek > 0 && dayOfWeek < 6);
     };
     return Problem;
 }());
