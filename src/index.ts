@@ -12,7 +12,6 @@ export class Problem {
     calculateDueDate(submitDateString: string, turnaroundTime: number): string {
         let submitDate: moment.Moment = moment(submitDateString, this.ISO_8601_FORMAT);
         let dayOfWeek = submitDate.day();
-        console.log('--dayOfWeek', dayOfWeek);
         if (dayOfWeek == 0 || dayOfWeek == 6) {
             throw new Error('The submitted date is not a working day.');
         }
@@ -21,15 +20,11 @@ export class Problem {
         if (startOfWorkingDayDiff < 0 || startOfWorkingDayDiff > this.workingHoursDiff) {
             throw new Error('The submitted date is not part of the working day.');
         }
-        console.log('--startOfWorkingDayDiff', startOfWorkingDayDiff);
         let numberOfDays = Math.floor((turnaroundTime + startOfWorkingDayDiff) / this.workingHoursDiff);
-        console.log('--numberOfDays', numberOfDays);
         while (numberOfDays > 0) {
             startOfWorkingDay.add(24, 'hours');
-            console.log('--startOfWorkingDay', startOfWorkingDay.format(this.ISO_8601_FORMAT));
             let dayOfWeek = startOfWorkingDay.day();
             if (dayOfWeek > 0 && dayOfWeek < 6) {
-                console.log('--isWorkingDay', true);
                 numberOfDays--;
             }
         }
@@ -38,10 +33,3 @@ export class Problem {
     }
 
 }
-
-let problem = new Problem();
-let submitDateString = '2018-04-20T09:00:00';
-let turnaroundTime = 10;
-console.log('submitDateString', submitDateString);
-console.log('turnaroundTime', turnaroundTime);
-console.log('dueDateString', problem.calculateDueDate(submitDateString, turnaroundTime));

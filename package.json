@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm run compile && npm test",
+    "compile": "tsc src/index.ts",
+    "test": "jasmine",
     "dev": "ts-node src/index.ts"
   },
   "author": "",
@@ -15,6 +17,7 @@
   },
   "devDependencies": {
     "@types/moment-timezone": "^0.5.4",
+    "jasmine": "^3.1.0",
     "ts-node": "^6.0.0",
     "typescript": "^2.8.3"
   }
