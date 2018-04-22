@@ -15,24 +15,32 @@ export class Problem {
             throw new Error('The submitted date is not a working day.');
         }
         let startOfWorkingDay: moment.Moment = moment(submitDate).startOf('day').add(this.workingHoursStart, 'hours');
-        let startOfWorkingDayDiff: number = submitDate.diff(startOfWorkingDay, 'hours', true);
-        if (startOfWorkingDayDiff < 0 || startOfWorkingDayDiff > this.workingHoursDiff) {
+        let hoursDiff: number = submitDate.diff(startOfWorkingDay, 'hours', true);
+        if (hoursDiff < 0 || hoursDiff > this.workingHoursDiff) {
             throw new Error('The submitted date is not part of the working day.');
         }
-        let numberOfDays = Math.floor((turnaroundTime + startOfWorkingDayDiff) / this.workingHoursDiff);
-        while (numberOfDays > 0) {
-            startOfWorkingDay.add(24, 'hours');
-            if (this._isWorkingDay(startOfWorkingDay)) {
-                numberOfDays--;
-            }
-        }
-        let dueDate = moment(startOfWorkingDay).add((turnaroundTime + startOfWorkingDayDiff) % this.workingHoursDiff, 'hours');
+        let dueTime: number = turnaroundTime + hoursDiff;
+        startOfWorkingDay = this._iterateDays(startOfWorkingDay, dueTime);
+        let numberOfHoursRemain: number = dueTime % this.workingHoursDiff;
+        let dueDate: moment.Moment = moment(startOfWorkingDay).add(numberOfHoursRemain, 'hours');
         return dueDate.format(this.ISO_8601_FORMAT);
     }
 
     _isWorkingDay(date: moment.Moment): boolean {
         let dayOfWeek = date.day();
         return (dayOfWeek > 0 && dayOfWeek < 6);
+    }
+
+    _iterateDays(startDate: moment.Moment, dueTime: number): moment.Moment {
+        let date: moment.Moment = moment(startDate);
+        let numberOfDaysOverlaps: number = Math.floor(dueTime / this.workingHoursDiff);
+        while (numberOfDaysOverlaps > 0) {
+            date.add(24, 'hours');
+            if (this._isWorkingDay(date)) {
+                numberOfDaysOverlaps--;
+            }
+        }
+        return date;
     }
 
 }

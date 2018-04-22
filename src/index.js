@@ -16,23 +16,30 @@ var Problem = /** @class */ (function () {
             throw new Error('The submitted date is not a working day.');
         }
         var startOfWorkingDay = moment(submitDate).startOf('day').add(this.workingHoursStart, 'hours');
-        var startOfWorkingDayDiff = submitDate.diff(startOfWorkingDay, 'hours', true);
-        if (startOfWorkingDayDiff < 0 || startOfWorkingDayDiff > this.workingHoursDiff) {
+        var hoursDiff = submitDate.diff(startOfWorkingDay, 'hours', true);
+        if (hoursDiff < 0 || hoursDiff > this.workingHoursDiff) {
             throw new Error('The submitted date is not part of the working day.');
         }
-        var numberOfDays = Math.floor((turnaroundTime + startOfWorkingDayDiff) / this.workingHoursDiff);
-        while (numberOfDays > 0) {
-            startOfWorkingDay.add(24, 'hours');
-            if (this._isWorkingDay(startOfWorkingDay)) {
-                numberOfDays--;
-            }
-        }
-        var dueDate = moment(startOfWorkingDay).add((turnaroundTime + startOfWorkingDayDiff) % this.workingHoursDiff, 'hours');
+        var dueTime = turnaroundTime + hoursDiff;
+        startOfWorkingDay = this._iterateDays(startOfWorkingDay, dueTime);
+        var numberOfHoursRemain = dueTime % this.workingHoursDiff;
+        var dueDate = moment(startOfWorkingDay).add(numberOfHoursRemain, 'hours');
         return dueDate.format(this.ISO_8601_FORMAT);
     };
     Problem.prototype._isWorkingDay = function (date) {
         var dayOfWeek = date.day();
         return (dayOfWeek > 0 && dayOfWeek < 6);
+    };
+    Problem.prototype._iterateDays = function (startDate, dueTime) {
+        var date = moment(startDate);
+        var numberOfDaysOverlaps = Math.floor(dueTime / this.workingHoursDiff);
+        while (numberOfDaysOverlaps > 0) {
+            date.add(24, 'hours');
+            if (this._isWorkingDay(date)) {
+                numberOfDaysOverlaps--;
+            }
+        }
+        return date;
     };
     return Problem;
 }());
